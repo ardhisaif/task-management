@@ -6,8 +6,8 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Task } from './task.entity';
-import { User } from './user.entity';
+import { Task } from '../tasks/task.entity';
+import { User } from '../users/user.entity';
 
 export type TaskAction =
   | 'TASK_CREATED'

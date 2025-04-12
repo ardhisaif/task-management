@@ -10,7 +10,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
-import { Task } from '../../entities/task.entity';
+import { Task } from './task.entity';
 
 @Controller('tasks')
 export class TaskController {
@@ -40,6 +40,14 @@ export class TaskController {
     @Body() taskData: Partial<Task>,
   ): Promise<Task> {
     return this.taskService.update(id, taskData);
+  }
+
+  @Patch(':id/toggle-completion')
+  async toggleTaskCompletion(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Task> {
+    const task = await this.taskService.findOne(id);
+    return this.taskService.update(id, { completed: !task.completed });
   }
 
   @Delete(':id')

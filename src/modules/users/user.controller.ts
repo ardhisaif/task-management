@@ -9,7 +9,7 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { User } from '../../entities/user.entity';
+import { User } from '../users/user.entity';
 
 @Controller('users')
 export class UserController {

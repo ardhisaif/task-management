@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Task } from '../../entities/task.entity';
-import { User } from '../../entities/user.entity';
+import { Task } from './task.entity';
+import { User } from '../users/user.entity';
 import { TaskLogService } from '../task-logs/task-log.service';
 
 @Injectable()
@@ -153,5 +153,10 @@ export class TaskService {
     );
 
     await this.taskRepository.remove(task);
+  }
+
+  async toggleCompletion(id: number, currentUser?: User): Promise<Task> {
+    const task = await this.findOne(id);
+    return this.update(id, { completed: !task.completed }, currentUser);
   }
 }

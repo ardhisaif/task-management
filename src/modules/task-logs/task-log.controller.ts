@@ -8,7 +8,7 @@ import {
   Body,
 } from '@nestjs/common';
 import { TaskLogService } from './task-log.service';
-import { TaskLog, TaskAction } from '../../entities/task-log.entity';
+import { TaskLog, TaskAction } from './task-log.entity';
 
 @Controller('task-logs')
 export class TaskLogController {

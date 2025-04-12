@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { TaskLog, TaskAction } from '../../entities/task-log.entity';
-import { Task } from '../../entities/task.entity';
-import { User } from '../../entities/user.entity';
+import { TaskLog, TaskAction } from './task-log.entity';
+import { Task } from '../tasks/task.entity';
+import { User } from '../users/user.entity';
 
 @Injectable()
 export class TaskLogService {

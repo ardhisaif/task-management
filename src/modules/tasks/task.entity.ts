@@ -7,8 +7,8 @@ import {
   ManyToOne,
   OneToMany,
 } from 'typeorm';
-import { User } from './user.entity';
-import { TaskLog } from './task-log.entity';
+import { User } from '../users/user.entity';
+import { TaskLog } from '../task-logs/task-log.entity';
 
 @Entity('tasks')
 export class Task {
