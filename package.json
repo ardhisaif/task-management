@@ -2,9 +2,9 @@
   "name": "task-management-system",
   "version": "0.0.1",
   "description": "",
-  "author": "",
+  "author": "ardhisaif",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -20,11 +20,28 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@nestjs/axios": "^4.0.0",
+    "@nestjs/cache-manager": "^3.0.1",
+    "@nestjs/class-validator": "^0.13.4",
     "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
+    "@nestjs/jwt": "^11.0.0",
+    "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/typeorm": "^11.0.0",
+    "@supabase/supabase-js": "^2.49.4",
+    "cache-manager": "^6.4.2",
+    "class-validator": "^0.14.1",
+    "dotenv": "^16.5.0",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "pg": "^8.14.1",
+    "redis": "^4.7.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "typeorm": "^0.3.22",
+    "typescript-class-validator": "^0.0.6"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
