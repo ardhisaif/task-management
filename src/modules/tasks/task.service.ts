@@ -61,13 +61,14 @@ export class TaskService {
 
   async findAll(): Promise<Task[]> {
     return this.taskRepository.find({
+      where: { isDeleted: false },
       relations: ['user'],
     });
   }
 
   async findOne(id: number): Promise<Task> {
     const task = await this.taskRepository.findOne({
-      where: { id },
+      where: { id, isDeleted: false },
       relations: ['user', 'taskLogs'],
     });
 
@@ -86,7 +87,10 @@ export class TaskService {
     }
 
     return this.taskRepository.find({
-      where: { user: { id: userId } },
+      where: {
+        user: { id: userId },
+        isDeleted: false,
+      },
     });
   }
 
@@ -139,6 +143,9 @@ export class TaskService {
   async remove(id: number, currentUser?: User): Promise<void> {
     const task = await this.findOne(id);
 
+    task.isDeleted = true;
+    await this.taskRepository.save(task);
+
     // Log the task deletion using TaskLogService
     await this.taskLogService.create(
       task,
@@ -151,8 +158,6 @@ export class TaskService {
       },
       undefined,
     );
-
-    await this.taskRepository.remove(task);
   }
 
   async toggleCompletion(id: number, currentUser?: User): Promise<Task> {

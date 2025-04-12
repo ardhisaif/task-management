@@ -24,6 +24,9 @@ export class Task {
   @Column({ type: 'boolean', default: false })
   completed: boolean;
 
+  @Column({ type: 'boolean', default: false })
+  isDeleted: boolean;
+
   @ManyToOne(() => User, (user) => user.tasks, { onDelete: 'CASCADE' })
   user: User;
 

@@ -19,10 +19,16 @@ export class TaskLogService {
     previousValues?: Record<string, any>,
     newValues?: Record<string, any>,
   ): Promise<TaskLog> {
+    if (!task || !task.id) {
+      throw new Error('Task object with valid ID is required');
+    }
+
     const taskLog = this.taskLogRepository.create({
       task,
+      taskId: task.id, // Pastikan taskId selalu diisi
       action,
       user,
+      userId: user?.id,
       previousValues,
       newValues,
     });
