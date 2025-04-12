@@ -12,4 +12,11 @@ export class AuthController {
   login(@Request() req: { user: User }) {
     return this.authService.login(req.user);
   }
+
+  @Post('register')
+  async register(
+    @Body() userData: Partial<User>,
+  ): Promise<Omit<User, 'password'>> {
+    return this.authService.register(userData);
+  }
 }
