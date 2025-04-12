@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Task } from '../../entities/task.entity';
 import { User } from '../../entities/user.entity';
-import { TaskLog } from '../../entities/task-log.entity';
+import { TaskLogService } from '../task-logs/task-log.service';
 
 @Injectable()
 export class TaskService {
@@ -12,40 +12,49 @@ export class TaskService {
     private taskRepository: Repository<Task>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    @InjectRepository(TaskLog)
-    private taskLogRepository: Repository<TaskLog>,
+    private taskLogService: TaskLogService,
   ) {}
 
-  async create(taskData: Partial<Task>): Promise<Task> {
-    if (!taskData.user && !taskData.user) {
+  async create(
+    taskData: Partial<Task> & { userId?: number },
+    currentUser?: User,
+  ): Promise<Task> {
+    // Check if neither user object nor userId is provided
+    if (!taskData.user && !taskData.userId) {
       throw new Error('User ID is required');
     }
 
-    // If userId is provided instead of user object
-    if (taskData.user && !taskData.user) {
+    // If userId is provided, fetch the user entity
+    if (taskData.userId) {
       const user = await this.userRepository.findOneBy({
-        id: taskData.user as number,
+        id: taskData.userId,
       });
 
       if (!user) {
         throw new NotFoundException(
-          `User with ID ${taskData.user as number} not found`,
+          `User with ID ${taskData.userId} not found`,
         );
       }
 
       taskData.user = user;
-      delete taskData.user; // Remove userId as we now have the user object
+      delete taskData.userId; // Remove userId as we now have the user object
     }
 
     const task = this.taskRepository.create(taskData);
     const savedTask = await this.taskRepository.save(task);
 
-    // Create a log entry for task creation
-    const taskLog = this.taskLogRepository.create({
-      task: savedTask,
-      action: 'TASK_CREATED',
-    });
-    await this.taskLogRepository.save(taskLog);
+    // Create a log entry for task creation using the TaskLogService
+    await this.taskLogService.create(
+      savedTask,
+      'TASK_CREATED',
+      currentUser,
+      undefined,
+      {
+        title: savedTask.title,
+        description: savedTask.description,
+        userId: savedTask.user.id,
+      },
+    );
 
     return savedTask;
   }
@@ -81,41 +90,67 @@ export class TaskService {
     });
   }
 
-  async update(id: number, taskData: Partial<Task>): Promise<Task> {
+  async update(
+    id: number,
+    taskData: Partial<Task>,
+    currentUser?: User,
+  ): Promise<Task> {
     const task = await this.findOne(id);
-    const previousStatus = task.completed;
+
+    // Store previous values for audit log
+    const previousValues = {
+      title: task.title,
+      description: task.description,
+      completed: task.completed,
+    };
 
     // Update task with new data
     Object.assign(task, taskData);
 
     const updatedTask = await this.taskRepository.save(task);
 
-    // Create a log if task status changed
+    // Determine the action type
+    let action: 'TASK_UPDATED' | 'TASK_COMPLETED' | 'TASK_REOPENED' =
+      'TASK_UPDATED';
+
     if (
       taskData.completed !== undefined &&
-      previousStatus !== taskData.completed
+      previousValues.completed !== taskData.completed
     ) {
-      const action = updatedTask.completed ? 'TASK_COMPLETED' : 'TASK_REOPENED';
-
-      const taskLog = this.taskLogRepository.create({
-        task: updatedTask,
-        action,
-      });
-      await this.taskLogRepository.save(taskLog);
+      action = taskData.completed ? 'TASK_COMPLETED' : 'TASK_REOPENED';
     }
+
+    // Log the action using TaskLogService
+    await this.taskLogService.create(
+      updatedTask,
+      action,
+      currentUser,
+      previousValues,
+      {
+        title: updatedTask.title,
+        description: updatedTask.description,
+        completed: updatedTask.completed,
+      },
+    );
 
     return updatedTask;
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number, currentUser?: User): Promise<void> {
     const task = await this.findOne(id);
 
-    // Create a log entry before deleting
-    const taskLog = this.taskLogRepository.create({
+    // Log the task deletion using TaskLogService
+    await this.taskLogService.create(
       task,
-      action: 'TASK_DELETED',
-    });
-    await this.taskLogRepository.save(taskLog);
+      'TASK_DELETED',
+      currentUser,
+      {
+        title: task.title,
+        description: task.description,
+        completed: task.completed,
+      },
+      undefined,
+    );
 
     await this.taskRepository.remove(task);
   }

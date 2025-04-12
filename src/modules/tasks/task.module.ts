@@ -4,10 +4,10 @@ import { TaskController } from './task.controller';
 import { TaskService } from './task.service';
 import { Task } from '../../entities/task.entity';
 import { User } from '../../entities/user.entity';
-import { TaskLog } from '../../entities/task-log.entity';
+import { TaskLogModule } from '../task-logs/task-log.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Task, User, TaskLog])],
+  imports: [TypeOrmModule.forFeature([Task, User]), TaskLogModule],
   controllers: [TaskController],
   providers: [TaskService],
   exports: [TaskService],

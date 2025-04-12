@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TaskModule } from './modules/tasks/task.module';
 import { UserModule } from './modules/users/user.module';
+import { TaskLogModule } from './modules/task-logs/task-log.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { UserModule } from './modules/users/user.module';
     }),
     TaskModule,
     UserModule,
+    TaskLogModule,
   ],
   controllers: [AppController],
   providers: [AppService],
