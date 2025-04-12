@@ -9,25 +9,49 @@ import {
   ParseIntPipe,
   Query,
   UseGuards,
+  Request,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { Task } from './task.entity';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { UserService } from '../users/user.service';
 
 @Controller('tasks')
-@UseGuards(RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class TaskController {
-  constructor(private readonly taskService: TaskService) {}
+  constructor(
+    private readonly taskService: TaskService,
+    private readonly userService: UserService,
+  ) {}
 
   @Post()
   @Roles('admin', 'user')
-  create(@Body() taskData: Partial<Task>): Promise<Task> {
-    return this.taskService.create(taskData);
+  async create(
+    @Body() taskData: Partial<Task>,
+    @Request() req: { user: { userId: number } },
+  ): Promise<Task> {
+    const user = await this.userService.findOne(req.user.userId);
+
+    // Set the user for the task
+    taskData.user = user;
+
+    return this.taskService.create(taskData, user);
   }
 
   @Get()
-  findAll(@Query('userId') userId?: string): Promise<Task[]> {
+  async findAll(
+    @Request() req: { user: { userId: number; role: string } },
+    @Query('userId') userId?: string,
+  ): Promise<Task[]> {
+    // If user is not admin, they can only see their own tasks
+    if (req.user.role !== 'admin') {
+      return this.taskService.findByUser(req.user.userId);
+    }
+
+    // Admin can see all tasks or filter by userId
     if (userId) {
       return this.taskService.findByUser(parseInt(userId, 10));
     }
@@ -35,29 +59,61 @@ export class TaskController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<Task> {
-    return this.taskService.findOne(id);
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: { user: { userId: number; role: string } },
+  ): Promise<Task> {
+    const task = await this.taskService.findOne(id);
+
+    // If user is not admin and not the task owner, deny access
+    if (req.user.role !== 'admin' && task.user.id !== req.user.userId) {
+      throw new UnauthorizedException('You can only view your own tasks');
+    }
+
+    return task;
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() taskData: Partial<Task>,
+    @Request() req: { user: { userId: number; role: string } },
   ): Promise<Task> {
-    return this.taskService.update(id, taskData);
+    const task = await this.taskService.findOne(id);
+    const user = await this.userService.findOne(req.user.userId);
+
+    // Only the task owner or an admin can update the task
+    if (req.user.role !== 'admin' && task.user.id !== req.user.userId) {
+      throw new UnauthorizedException('You can only update your own tasks');
+    }
+
+    return this.taskService.update(id, taskData, user);
   }
 
   @Patch(':id/toggle-completion')
   async toggleTaskCompletion(
     @Param('id', ParseIntPipe) id: number,
+    @Request() req: { user: { userId: number; role: string } },
   ): Promise<Task> {
     const task = await this.taskService.findOne(id);
-    return this.taskService.update(id, { completed: !task.completed });
+    const user = await this.userService.findOne(req.user.userId);
+
+    // Only the task owner or an admin can toggle completion
+    if (req.user.role !== 'admin' && task.user.id !== req.user.userId) {
+      throw new UnauthorizedException('You can only modify your own tasks');
+    }
+
+    return this.taskService.update(id, { completed: !task.completed }, user);
   }
 
   @Delete(':id')
-  @Roles('admin')
-  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.taskService.remove(id);
+  @Roles('admin', 'user')
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: { user: { userId: number } },
+  ): Promise<{ message: string }> {
+    const user = await this.userService.findOne(req.user.userId);
+    await this.taskService.remove(id, user);
+    return { message: 'Task deleted successfully' };
   }
 }

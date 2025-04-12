@@ -7,6 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Task } from '../tasks/task.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('users')
 export class User {
@@ -20,6 +21,7 @@ export class User {
   email: string;
 
   @Column({ type: 'varchar', length: 255 })
+  @Exclude()
   password: string;
 
   @Column({ type: 'varchar', length: 50 })
@@ -32,5 +34,5 @@ export class User {
   updatedAt: Date;
 
   @OneToMany(() => Task, (task) => task.user)
-  tasks: Task[]; // Tambahkan tipe eksplisit
+  tasks: Task[];
 }

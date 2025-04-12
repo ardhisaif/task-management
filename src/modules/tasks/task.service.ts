@@ -69,7 +69,7 @@ export class TaskService {
   async findOne(id: number): Promise<Task> {
     const task = await this.taskRepository.findOne({
       where: { id, isDeleted: false },
-      relations: ['user', 'taskLogs'],
+      relations: ['user'],
     });
 
     if (!task) {

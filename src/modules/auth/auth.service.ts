@@ -16,14 +16,11 @@ export class AuthService {
       throw new Error('Password is required');
     }
     const hashedPassword = await bcrypt.hash(userData.password, 12);
-    console.log(hashedPassword);
 
     userData.password = hashedPassword;
     userData.role = 'user'; // Set default role to "user"
     const user = await this.userService.create(userData);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...result } = user; // Exclude password from the response
-    return result;
+    return user;
   }
 
   async validateUser(username: string, password: string): Promise<User | null> {
