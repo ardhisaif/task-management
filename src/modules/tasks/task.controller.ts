@@ -8,15 +8,20 @@ import {
   Delete,
   ParseIntPipe,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { Task } from './task.entity';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 
 @Controller('tasks')
+@UseGuards(RolesGuard)
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @Post()
+  @Roles('admin', 'user')
   create(@Body() taskData: Partial<Task>): Promise<Task> {
     return this.taskService.create(taskData);
   }
@@ -51,6 +56,7 @@ export class TaskController {
   }
 
   @Delete(':id')
+  @Roles('admin')
   remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return this.taskService.remove(id);
   }
