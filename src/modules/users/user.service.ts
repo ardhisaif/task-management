@@ -6,12 +6,17 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
+import { CacheService } from '../../common/services/cache.service';
 
 @Injectable()
 export class UserService {
+  private readonly CACHE_KEY_PREFIX = 'user';
+  private readonly CACHE_TTL = 3600; // 1 hour
+
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    private cacheService: CacheService,
   ) {}
 
   async create(userData: Partial<User>): Promise<User> {
@@ -33,6 +38,16 @@ export class UserService {
   }
 
   async findOne(id: number): Promise<User> {
+    // Generate cache key for this user
+    const cacheKey = this.cacheService.generateKey(this.CACHE_KEY_PREFIX, id);
+
+    // Try to get from cache first
+    const cachedUser = await this.cacheService.get<User>(cacheKey);
+    if (cachedUser) {
+      return cachedUser;
+    }
+
+    // If not in cache, get from database
     const user = await this.userRepository.findOne({
       where: { id },
       relations: ['tasks'],
@@ -41,6 +56,9 @@ export class UserService {
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
+
+    // Store in cache for future requests
+    await this.cacheService.set(cacheKey, user, this.CACHE_TTL);
 
     return user;
   }
