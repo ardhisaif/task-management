@@ -6,6 +6,7 @@ import { TaskModule } from './modules/tasks/task.module';
 import { UserModule } from './modules/users/user.module';
 import { TaskLogModule } from './modules/task-logs/task-log.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AuthModule } from './modules/auth/auth.module';
       autoLoadEntities: true,
       synchronize: true, // Jangan gunakan di production
     }),
+    CommonModule,
     TaskModule,
     UserModule,
     TaskLogModule,

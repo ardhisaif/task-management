@@ -2,17 +2,37 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DataSource } from 'typeorm';
-import { ClassSerializerInterceptor, Logger } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  Logger,
+  ValidationPipe,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('Bootstrap');
 
-  // Register the HTTP exception filter globally
-  app.useGlobalFilters(new HttpExceptionFilter());
+  // Enable validation pipe with detailed error messages
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+      disableErrorMessages: false,
+      exceptionFactory: (errors) => {
+        const result = errors.map((error) => ({
+          property: error.property,
+          message: error.constraints
+            ? Object.values(error.constraints)[0]
+            : 'validation error',
+        }));
+        return new Error(`Validation failed: ${JSON.stringify(result)}`);
+      },
+    }),
+  );
 
   // Enable global serialization interceptor and logging interceptor
   app.useGlobalInterceptors(
