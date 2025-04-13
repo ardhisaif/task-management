@@ -16,13 +16,13 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ApiProperty({ description: 'Username', example: 'johndoe' })
+  @ApiProperty({ description: 'Username', example: 'ahmad' })
   @Column({ type: 'varchar', length: 100, unique: true })
   username: string;
 
   @ApiProperty({
     description: 'Email address',
-    example: 'john.doe@example.com',
+    example: 'ahmad@gmail.com',
   })
   @Column({ type: 'varchar', length: 255, unique: true })
   email: string;
