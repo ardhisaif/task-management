@@ -1,6 +1,6 @@
 # 📝 Task Management System
 
-A robust RESTful API built with NestJS for efficient task management with advanced features like authentication, role-based access control, and external integrations.
+A comprehensive RESTful API built with NestJS for efficient task management with features including JWT authentication, role-based access control, audit logging, and external API integration.
 
 ![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
@@ -10,85 +10,155 @@ A robust RESTful API built with NestJS for efficient task management with advanc
 
 ## 🚀 Features
 
-### Core Capabilities
+### Core Functionalities
 
-- **User Management** - Complete registration and authentication flow
-- **Role-Based Access Control** - Admin and User role separation
-- **Task Management** - Create, assign, update, and delete tasks
-- **External API Integration** - Automatic motivational quotes for new tasks
-- **Data Persistence** - PostgreSQL via Supabase with TypeORM
-- **Performance Optimization** - Redis caching for frequently accessed data
+- **User Management**
 
-### Advanced Features
+  - User registration and authentication
+  - Profile management (CRUD operations)
+  - Password hashing with bcrypt
 
-- **Comprehensive Documentation** - Swagger/OpenAPI integration
-- **Robust Error Handling** - Global exception filters
-- **Security** - JWT-based authentication
-- **Logging** - Request tracking and activity monitoring
-- **Transactional Operations** - Ensures data integrity
+- **Task Management**
 
-## 🏗️ Architecture
+  - Create, read, update, and delete tasks
+  - Task assignment to users
+  - Task status tracking (completed/incomplete)
+  - Soft delete functionality
+  - Motivational quotes integration
+
+- **Authentication & Authorization**
+
+  - JWT-based authentication
+  - Role-based access control (admin & user roles)
+  - Protected routes with guards
+
+- **Audit Logging**
+  - Comprehensive task action tracking
+  - Change history with previous and new values
+  - User attribution for all actions
+
+### Technical Features
+
+- **Caching Layer**
+
+  - Redis-backed caching system
+  - Cache invalidation strategies
+  - Configurable TTL for cached entities
+
+- **Error Handling**
+
+  - Global exception filters
+  - Detailed error reporting
+  - Structured error responses
+
+- **Logging System**
+
+  - Request/response logging
+  - Error logging with stack traces
+  - Structured logging format
+
+- **External Integrations**
+  - ZenQuotes API for motivational quotes
+  - Axios-based HTTP client with error handling
+
+## 📂 Project Structure
 
 ```
 src/
+├── app.module.ts                # Main application module
+├── main.ts                      # Application entry point
 │
-├── auth/              # Authentication & authorization
-├── users/             # User management
-├── tasks/             # Task management
-├── common/            # Shared utilities
-├── config/            # Configuration
-├── external/          # External API integrations
-├── app.module.ts      # Root module
-└── main.ts            # Entry point
+├── common/                      # Shared utilities and services
+│   ├── controllers/             # Health check endpoints
+│   ├── exceptions/              # Custom exceptions
+│   ├── filters/                 # Exception filters
+│   ├── interceptors/            # Request/response interceptors
+│   └── services/                # Shared services (caching, error reporting)
+│
+├── modules/                     # Feature modules
+│   ├── auth/                    # Authentication & authorization
+│   │   ├── auth.controller.ts   # Auth endpoints (login, register)
+│   │   ├── auth.module.ts       # Auth module configuration
+│   │   ├── auth.service.ts      # Auth business logic
+│   │   ├── jwt-auth.guard.ts    # JWT authentication guard
+│   │   ├── jwt.strategy.ts      # JWT strategy for Passport
+│   │   ├── local.strategy.ts    # Username/password strategy
+│   │   └── roles.guard.ts       # Role-based authorization guard
+│   │
+│   ├── users/                   # User management
+│   │   ├── user.controller.ts   # User endpoints
+│   │   ├── user.entity.ts       # User database entity
+│   │   ├── user.module.ts       # User module configuration
+│   │   └── user.service.ts      # User business logic
+│   │
+│   ├── tasks/                   # Task management
+│   │   ├── task.controller.ts   # Task endpoints
+│   │   ├── task.entity.ts       # Task database entity
+│   │   ├── task.module.ts       # Task module configuration
+│   │   └── task.service.ts      # Task business logic
+│   │
+│   ├── task-logs/               # Audit logging
+│   │   ├── task-log.controller.ts # Log endpoints
+│   │   ├── task-log.entity.ts   # Log database entity
+│   │   ├── task-log.module.ts   # Log module configuration
+│   │   └── task-log.service.ts  # Log business logic
+│   │
+│   └── external/                # External API integrations
+│       ├── external.module.ts   # External module configuration
+│       └── quote.service.ts     # Motivational quotes API client
 ```
 
-## 🔧 Tech Stack
+## 🛠️ Tech Stack
 
-- **Framework**: NestJS
-- **Language**: TypeScript
-- **Database**: PostgreSQL (via Supabase)
-- **ORM**: TypeORM
-- **Caching**: Redis
-- **Authentication**: JWT with role-based strategy
-- **Documentation**: Swagger/OpenAPI
+### Core Technologies
+
+- **Framework**: NestJS 11.x
+- **Language**: TypeScript 5.x
+- **Database**: PostgreSQL with TypeORM
+- **Caching**: Redis with cache-manager
+- **Authentication**: JWT with Passport.js
+
+### Key Dependencies
+
+- **@nestjs/cache-manager**: For Redis-based caching
+- **@nestjs/axios**: For HTTP requests to external APIs
+- **@nestjs/jwt & @nestjs/passport**: For authentication
+- **@nestjs/typeorm & typeorm**: For database ORM
+- **bcrypt**: For password hashing
+- **class-validator**: For DTO validation
 
 ## 🚦 Getting Started
 
 ### Prerequisites
 
-- Node.js (v14 or later)
-- Yarn package manager
+- Node.js v14+ and npm/yarn
+- PostgreSQL database
 - Redis server
-- PostgreSQL database (Supabase account)
 
-### Installation
+### Environment Setup
 
-1. **Clone the repository**
+Create a `.env` file in the root directory with the following variables:
 
-```bash
-git clone https://github.com/yourusername/task-management-api.git
-cd task-management-api
-```
+```env
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASS=yourpassword
+DB_NAME=taskmanagement
 
-2. **Install dependencies**
-
-```bash
-yarn install
-```
-
-3. **Configure environment variables**
-
-Create a `.env` file in the project root:
-
-```
-DATABASE_URL=your_supabase_postgresql_url
-JWT_SECRET=your_jwt_secret_key
+# Redis
 REDIS_HOST=localhost
 REDIS_PORT=6379
+
+# JWT
+JWT_SECRET=your_jwt_secret_key
+
+# Server
 PORT=3000
 ```
 
-4. **Run database migrations**
+### Installation & Running
 
 ```bash
 yarn typeorm migration:run
@@ -104,29 +174,131 @@ yarn start:dev
 yarn start:prod
 ```
 
-The API will be available at: `http://localhost:3000`
+## 🔑 Authentication
 
-## 📚 API Documentation
+The system uses JWT-based authentication. To use protected endpoints:
 
-Once the application is running, access the Swagger documentation at:
+1. Register a user with `POST /auth/register`
+2. Login with `POST /auth/login` to receive a JWT token
+3. Include the token in subsequent requests as a Bearer token in the Authorization header
+
+Example:
 
 ```
-http://localhost:3000/api-docs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-### Key Endpoints
+## 🔐 Role-Based Access
 
-- **Authentication**
+Two main roles exist in the system:
 
-  - `POST /auth/register` - Create new user account
-  - `POST /auth/login` - Get authentication token
+- **User**: Can manage their own tasks
+- **Admin**: Has full access to all tasks and user management
 
-- **Tasks**
-  - `GET /tasks` - List all tasks (with filtering)
-  - `POST /tasks` - Create new task
-  - `GET /tasks/:id` - Get task details
-  - `PATCH /tasks/:id` - Update task
-  - `DELETE /tasks/:id` - Remove task
+## 📊 API Endpoints
+
+### Authentication
+
+- `POST /auth/register` - Register a new user
+- `POST /auth/login` - Login and receive JWT token
+
+### Users
+
+- `GET /users` - List all users (admin only)
+- `GET /users/:id` - Get user details
+- `PATCH /users/:id` - Update user
+- `DELETE /users/:id` - Delete user
+- `GET /users/username/:username` - Find user by username
+
+### Tasks
+
+- `GET /tasks` - List tasks (filters by user for non-admins)
+- `POST /tasks` - Create a new task
+- `GET /tasks/:id` - Get task details
+- `PATCH /tasks/:id` - Update task
+- `DELETE /tasks/:id` - Delete task (soft delete)
+- `PATCH /tasks/:id/toggle-completion` - Toggle task completion status
+
+### Task Logs
+
+- `GET /task-logs` - Get activity logs with filters
+- `GET /task-logs/task/:taskId` - Get logs for specific task
+- `POST /task-logs/mark-viewed` - Mark logs as viewed
+
+### System Health
+
+- `GET /health/redis` - Check Redis connectivity
+
+## 💾 Database Entities
+
+### User
+
+- `id`: Primary key
+- `username`: Unique username
+- `email`: Unique email address
+- `password`: Hashed password (bcrypt)
+- `role`: User role (admin/user)
+- `createdAt`: Creation timestamp
+- `updatedAt`: Last update timestamp
+- `tasks`: One-to-many relationship with tasks
+
+### Task
+
+- `id`: Primary key
+- `title`: Task title
+- `description`: Task description
+- `quotes`: Motivational quotes
+- `completed`: Completion status
+- `isDeleted`: Soft delete flag
+- `user`: Many-to-one relationship with user
+- `taskLogs`: One-to-many relationship with task logs
+- `createdAt`: Creation timestamp
+- `updatedAt`: Last update timestamp
+
+### TaskLog
+
+- `id`: Primary key
+- `task`: Related task
+- `user`: User who performed the action
+- `action`: Action type (created, updated, completed, etc.)
+- `previousValues`: Previous state (JSON)
+- `newValues`: New state (JSON)
+- `createdAt`: Action timestamp
+- `viewed`: Flag indicating if log has been viewed
+
+## 🧠 Caching Strategy
+
+The system implements Redis-based caching for frequently accessed data:
+
+- User profiles are cached with a 1-hour TTL
+- Health checks validate Redis connectivity
+- Cache keys follow a consistent format using the `generateKey` utility
+
+## 🔄 External API Integration
+
+Tasks can include motivational quotes fetched from the ZenQuotes API:
+
+- Quote fetching is done automatically when creating a task
+- Quotes are stored with the task
+- Error handling ensures the system continues to work if the external API is unavailable
+
+## 🛡️ Error Handling
+
+The application implements a robust error handling strategy:
+
+- Global exception filter catches all unhandled exceptions
+- HTTP exceptions are transformed into standardized responses
+- Detailed error reporting with timestamps and request information
+- Error logs are persisted for debugging
+
+## 🔍 Logging
+
+Comprehensive logging throughout the application:
+
+- Request/response logging via interceptors
+- Error logging with stack traces
+- Cache operations logging (hits/misses)
+- Structured log format for easier parsing
 
 ## 🧪 Testing
 
@@ -141,16 +313,6 @@ yarn test:e2e
 yarn test:cov
 ```
 
-## 🌐 External Integration
-
-When creating tasks, the system automatically fetches inspirational quotes from [ZenQuotes API](https://zenquotes.io) and incorporates them into task descriptions.
-
-## 🔮 Future Enhancements
-
-- Task scheduling and reminders
-- Advanced analytics dashboard
-- Team collaboration features
-- Mobile app integration
 
 ## 📄 License
 
@@ -160,4 +322,6 @@ This project is licensed under the MIT License.
 
 Developed by Ahmad Saifudin Ardhiansyah
 
-Feel free to reach out with questions or suggestions!
+---
+
+For questions, feedback, or contributions, please open an issue or pull request in the repository.
