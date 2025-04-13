@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   // Set log levels
@@ -22,22 +23,44 @@ async function bootstrap() {
   // Enable validation pipe with detailed error messages
   app.useGlobalPipes(
     new ValidationPipe({
+      transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
-      transform: true,
-      transformOptions: { enableImplicitConversion: true },
-      disableErrorMessages: false,
-      exceptionFactory: (errors) => {
-        const result = errors.map((error) => ({
-          property: error.property,
-          message: error.constraints
-            ? Object.values(error.constraints)[0]
-            : 'validation error',
-        }));
-        return new Error(`Validation failed: ${JSON.stringify(result)}`);
-      },
+      disableErrorMessages: false, // Make sure this is false to see detailed error messages
     }),
   );
+
+  // Setup Swagger documentation
+  const options = new DocumentBuilder()
+    .setTitle('Task Management System API')
+    .setDescription(
+      'RESTful API for managing tasks with JWT authentication, role-based access, and audit logging',
+    )
+    .setVersion('1.0')
+    .addTag('auth', 'Authentication endpoints')
+    .addTag('users', 'User management')
+    .addTag('tasks', 'Task operations')
+    .addTag('task-logs', 'Audit logging')
+    .addTag('health', 'System health checks')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth', // This is a key to be used in @ApiBearerAuth() decorator
+    )
+    .build();
+
+  const document = SwaggerModule.createDocument(app, options);
+  SwaggerModule.setup('api-docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
 
   // Enable global serialization interceptor and logging interceptor
   app.useGlobalInterceptors(
@@ -56,6 +79,9 @@ async function bootstrap() {
   await app.listen(process.env.PORT ?? 3000);
   logger.log(
     `Application is running on: http://localhost:${process.env.PORT ?? 3000}`,
+  );
+  logger.log(
+    `Swagger documentation available at: http://localhost:${process.env.PORT ?? 3000}/api-docs`,
   );
 }
 void bootstrap();

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { UserModule } from '../users/user.module';
@@ -10,7 +10,7 @@ import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Module({
   imports: [
-    UserModule,
+    forwardRef(() => UserModule), // Use forwardRef here too
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET,

@@ -195,6 +195,35 @@ Two main roles exist in the system:
 - **User**: Can manage their own tasks
 - **Admin**: Has full access to all tasks and user management
 
+## 📚 API Documentation
+
+The project includes Swagger documentation that provides an interactive interface to explore and test the API endpoints.
+
+### How to Access Swagger UI
+
+1. Start the application: `yarn start:dev` or `yarn start:prod`
+2. Open your browser and navigate to: `http://localhost:3000/api-docs`
+3. You'll see the Swagger UI interface with all available endpoints grouped by tags
+
+### Using Swagger UI
+
+1. **Authentication**:
+
+   - First, use the `/auth/register` endpoint to create a user
+   - Then, use the `/auth/login` endpoint to get a JWT token
+   - Click the "Authorize" button at the top right and paste your token
+
+2. **Testing Endpoints**:
+
+   - Expand any endpoint to see details about required parameters and response schemas
+   - Fill in the required fields and click "Execute" to test the endpoint
+   - The response will be displayed below
+
+3. **Features**:
+   - View request/response schemas
+   - Try out endpoints directly in the browser
+   - Download OpenAPI specification
+
 ## 📊 API Endpoints
 
 ### Authentication
@@ -312,7 +341,6 @@ yarn test:e2e
 # Test coverage
 yarn test:cov
 ```
-
 
 ## 📄 License
 
