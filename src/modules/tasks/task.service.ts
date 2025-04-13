@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Task } from './task.entity';
 import { User } from '../users/user.entity';
 import { TaskLogService } from '../task-logs/task-log.service';
+import { QuoteService } from '../external/quote.service';
 
 @Injectable()
 export class TaskService {
@@ -13,6 +14,7 @@ export class TaskService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private taskLogService: TaskLogService,
+    private quoteService: QuoteService,
   ) {}
 
   async create(
@@ -40,6 +42,18 @@ export class TaskService {
       delete taskData.userId; // Remove userId as we now have the user object
     }
 
+    // Fetch a motivational quote if not already provided
+    if (!taskData.quotes) {
+      try {
+        const quote = await this.quoteService.getRandomQuote();
+        if (quote) {
+          taskData.quotes = quote;
+        }
+      } catch {
+        // Continue even if quote fetching fails
+      }
+    }
+
     const task = this.taskRepository.create(taskData);
     const savedTask = await this.taskRepository.save(task);
 
@@ -52,6 +66,7 @@ export class TaskService {
       {
         title: savedTask.title,
         description: savedTask.description,
+        quotes: savedTask.quotes,
         userId: savedTask.user.id,
       },
     );

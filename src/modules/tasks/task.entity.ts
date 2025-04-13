@@ -21,6 +21,9 @@ export class Task {
   @Column({ type: 'text', nullable: true })
   description: string;
 
+  @Column({ type: 'text', nullable: true })
+  quotes: string;
+
   @Column({ type: 'boolean', default: false })
   completed: boolean;
 

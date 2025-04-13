@@ -7,6 +7,7 @@ import { User } from '../users/user.entity';
 import { TaskLogModule } from '../task-logs/task-log.module';
 import { UserModule } from '../users/user.module';
 import { AuthModule } from '../auth/auth.module';
+import { ExternalModule } from '../external/external.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AuthModule } from '../auth/auth.module';
     TaskLogModule,
     UserModule,
     AuthModule,
+    ExternalModule,
   ],
   controllers: [TaskController],
   providers: [TaskService],
