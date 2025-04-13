@@ -11,8 +11,13 @@ import { Reflector } from '@nestjs/core';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // Set log levels
   const logger = new Logger('Bootstrap');
+
+  // Create app
+  const app = await NestFactory.create(AppModule, {
+    logger: ['error', 'warn', 'debug', 'log', 'verbose'], // Tambahkan 'verbose' untuk log lebih detail
+  });
 
   // Enable validation pipe with detailed error messages
   app.useGlobalPipes(

@@ -15,8 +15,16 @@ export class CacheService {
    */
   async get<T>(key: string): Promise<T | undefined> {
     try {
+      this.logger.debug(`Attempting to get cache key: ${key}`);
       const result = await this.cacheManager.get<T>(key);
-      return result === null ? undefined : result;
+
+      if (result === null) {
+        this.logger.debug(`Cache miss for key: ${key}`);
+        return undefined;
+      }
+
+      this.logger.debug(`Cache hit for key: ${key}`);
+      return result;
     } catch (error) {
       this.logger.error(
         `Error getting cache key ${key}: ${error instanceof Error ? error.message : String(error)}`,
@@ -33,7 +41,11 @@ export class CacheService {
    */
   async set(key: string, value: any, ttl?: number): Promise<void> {
     try {
+      this.logger.debug(
+        `Setting cache key: ${key}, TTL: ${ttl || 'default'} seconds`,
+      );
       await this.cacheManager.set(key, value, ttl);
+      this.logger.debug(`Successfully set cache key: ${key}`);
     } catch (error) {
       this.logger.error(
         `Error setting cache key ${key}: ${error instanceof Error ? error.message : String(error)}`,
